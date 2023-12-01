@@ -11,15 +11,11 @@ fn main() -> Result<()> {
 }
 
 fn solution(input: Vec<u8>) -> u32 {
-    input
-        .split(|&byte| byte == b'\n')
-        .map(parse_line)
-        .flatten()
-        .map(|(first, last)| first * 10 + last)
-        .sum()
+    // Split the input on lines, parse each line into a number and sum.
+    input.split(|&byte| byte == b'\n').map(parse_line).sum()
 }
 
-fn parse_line(line: &[u8]) -> Option<(u32, u32)> {
+fn parse_line(line: &[u8]) -> u32 {
     // Step forward through line one byte at a time testing if any suffix
     // of the current subslice is a valid digit (determined by `parse_digit`).
     // Return the first match.
@@ -34,9 +30,10 @@ fn parse_line(line: &[u8]) -> Option<(u32, u32)> {
         .find_map(parse_digit);
 
     if first.is_some() && last.is_some() {
-        Some((first.unwrap(), last.unwrap()))
+        // Join the digis into a number.
+        first.unwrap() * 10 + last.unwrap()
     } else {
-        None
+        0
     }
 }
 
@@ -77,7 +74,7 @@ zoneight234
     fn test_parse_line() {
         let input = b"7pqrstsixteen";
         let result = parse_line(input);
-        let expected = Some((7, 6));
+        let expected = 76;
         assert_eq!(result, expected);
     }
 
@@ -85,7 +82,7 @@ zoneight234
     fn test_parse_line_2() {
         let input = b"ppjvndvknbtpfsncplmhhrlh5";
         let result = parse_line(input);
-        let expected = Some((5, 5));
+        let expected = 55;
         assert_eq!(result, expected);
     }
 
@@ -93,7 +90,7 @@ zoneight234
     fn test_parse_line_3() {
         let input = b"";
         let result = parse_line(input);
-        let expected = None;
+        let expected = 0;
         assert_eq!(result, expected);
     }
 }
