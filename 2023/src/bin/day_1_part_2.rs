@@ -20,38 +20,24 @@ fn solution(input: Vec<u8>) -> u32 {
 }
 
 fn parse_line(line: &[u8]) -> Option<(u32, u32)> {
-    let first = parse_line_first(line);
-    let last = parse_line_last(line);
+    // Step forward through line one byte at a time testing if any suffix
+    // of the current subslice is a valid digit (determined by `parse_digit`).
+    // Return the first match.
+    let first = (0..=line.len())
+        .flat_map(|r| (0..r).map(move |l| &line[l..r]))
+        .find_map(parse_digit);
+
+    // Same as above but in the reverse direction.
+    let last = (0..=line.len())
+        .rev()
+        .flat_map(|r| (0..r).rev().map(move |l| &line[l..r]))
+        .find_map(parse_digit);
 
     if first.is_some() && last.is_some() {
         Some((first.unwrap(), last.unwrap()))
     } else {
         None
     }
-}
-
-fn parse_line_first(line: &[u8]) -> Option<u32> {
-    for right in 0..=line.len() {
-        for left in 0..right {
-            if let Some(x) = parse_digit(&line[left..right]) {
-                return Some(x);
-            }
-        }
-    }
-
-    None
-}
-
-fn parse_line_last(line: &[u8]) -> Option<u32> {
-    for right in (0..=line.len()).rev() {
-        for left in (0..right).rev() {
-            if let Some(x) = parse_digit(&line[left..right]) {
-                return Some(x);
-            }
-        }
-    }
-
-    None
 }
 
 fn parse_digit(input: &[u8]) -> Option<u32> {
