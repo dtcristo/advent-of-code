@@ -1,13 +1,11 @@
-use std::fs::read_to_string;
-
 fn main() {
-    let input = read_to_string("input/day_01").unwrap();
+    let input = include_str!("../../input/day_01");
     let result = solution(input);
 
     println!("{result}");
 }
 
-fn solution(input: String) -> u32 {
+fn solution(input: &str) -> u32 {
     input
         // Split the input into lines.
         .lines()
@@ -39,7 +37,8 @@ mod tests {
 pqr3stu8vwx
 a1b2c3d4e5f
 treb7uchet";
-        let result = solution(input.to_string());
-        assert_eq!(result, 142);
+        let result = solution(input);
+        let exptected = 142;
+        assert_eq!(result, exptected);
     }
 }

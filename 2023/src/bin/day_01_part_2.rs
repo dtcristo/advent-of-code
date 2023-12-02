@@ -1,13 +1,11 @@
-use std::fs::read;
-
 fn main() {
-    let input = read("input/day_01").unwrap();
+    let input = include_bytes!("../../input/day_01");
     let result = solution(input);
 
     println!("{result}");
 }
 
-fn solution(input: Vec<u8>) -> u32 {
+fn solution(input: &[u8]) -> u32 {
     // Split the input on lines, parse each line into a number and sum.
     input.split(|&byte| byte == b'\n').map(parse_line).sum()
 }
@@ -63,7 +61,7 @@ xtwone3four
 4nineeightseven2
 zoneight234
 7pqrstsixteen";
-        let result = solution(input.to_vec());
+        let result = solution(input);
         let expected = 281;
         assert_eq!(result, expected);
     }
