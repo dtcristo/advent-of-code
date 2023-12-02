@@ -1,0 +1,8 @@
+run day part:
+    cargo run --bin day_{{day}}_part_{{part}}
+
+test day part:
+    cargo test --bin day_{{day}}_part_{{part}}
+
+watch day part:
+    cargo watch -x "test --bin day_{{day}}_part_{{part}}"
