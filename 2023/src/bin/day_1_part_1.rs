@@ -12,14 +12,23 @@ fn main() -> Result<()> {
 
 fn solution(input: String) -> u32 {
     input
+        // Split the input into lines.
         .lines()
+        // Map each line into a `u32`.
         .map(|line| {
-            let numbers: Vec<char> = line.chars().filter(|char| char.is_numeric()).collect();
+            // Create an iterator that breaks up the line into characters,
+            // filter map each character into a digit (`u32`) returning just
+            // the valid digits.
+            let mut it = line.chars().filter_map(|char| char.to_digit(10));
+            // Get the first digit.
+            let first = it.next().unwrap();
+            // Get the last digit defaulting to the first if no more digits.
+            let last = it.last().unwrap_or(first);
 
-            format!("{}{}", numbers.first().unwrap(), numbers.last().unwrap())
-                .parse::<u32>()
-                .unwrap()
+            // Join the digis into the "full" number.
+            first * 10 + last
         })
+        // Sum the numbers for each line.
         .sum()
 }
 
