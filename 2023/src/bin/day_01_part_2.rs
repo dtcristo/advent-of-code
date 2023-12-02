@@ -2,7 +2,7 @@ use anyhow::Result;
 use std::fs::read;
 
 fn main() -> Result<()> {
-    let input = read("input/day_1")?;
+    let input = read("input/day_01")?;
     let result = solution(input);
 
     println!("{result}");
