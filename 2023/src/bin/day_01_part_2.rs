@@ -55,6 +55,7 @@ fn parse_digit(input: &[u8]) -> Option<u32> {
 #[cfg(test)]
 mod tests {
     use crate::*;
+    use rstest::rstest;
 
     #[test]
     fn test_solution() {
@@ -70,27 +71,12 @@ zoneight234
         assert_eq!(result, expected);
     }
 
-    #[test]
-    fn test_parse_line() {
-        let input = b"7pqrstsixteen";
-        let result = parse_line(input);
-        let expected = 76;
-        assert_eq!(result, expected);
-    }
-
-    #[test]
-    fn test_parse_line_2() {
-        let input = b"ppjvndvknbtpfsncplmhhrlh5";
-        let result = parse_line(input);
-        let expected = 55;
-        assert_eq!(result, expected);
-    }
-
-    #[test]
-    fn test_parse_line_3() {
-        let input = b"";
-        let result = parse_line(input);
-        let expected = 0;
-        assert_eq!(result, expected);
+    #[rstest]
+    #[case(b"", 0)]
+    #[case(b"7pqrstsixteen", 76)]
+    #[case(b"ppjvndvknbtpfsncplmhhrlh5", 55)]
+    #[case(b"gvzkmxg55twonem", 51)]
+    fn test_parse_line(#[case] input: &[u8], #[case] expected: u32) {
+        assert_eq!(parse_line(input), expected);
     }
 }
