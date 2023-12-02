@@ -26,11 +26,11 @@ fn solution(input: &str) -> u32 {
 #[derive(Debug, PartialEq, Eq)]
 struct Game {
     id: u32,
-    rounds: Vec<Round>,
+    rounds: Vec<Cubes>,
 }
 
 #[derive(Debug, PartialEq, Eq)]
-struct Round {
+struct Cubes {
     red: u32,
     green: u32,
     blue: u32,
@@ -48,15 +48,15 @@ impl From<&str> for Game {
             .unwrap()
             .parse()
             .unwrap();
-        let rounds = iter.next().unwrap().split(";").map(Round::from).collect();
+        let rounds = iter.next().unwrap().split(";").map(Cubes::from).collect();
 
         Game { id, rounds }
     }
 }
 
-impl From<&str> for Round {
+impl From<&str> for Cubes {
     // Take a serialized round (eg. " 1 green, 3 red, 6 blue") and parse it
-    // into a `Round` struct (eg. `Round { red: 3, green: 1, blue: 6 }`).
+    // into a `Cubes` struct (eg. `Cubes { red: 3, green: 1, blue: 6 }`).
     fn from(str: &str) -> Self {
         let mut red = 0;
         let mut green = 0;
@@ -78,7 +78,7 @@ impl From<&str> for Round {
             }
         });
 
-        Round { red, green, blue }
+        Cubes { red, green, blue }
     }
 }
 
@@ -88,7 +88,7 @@ impl Game {
     }
 }
 
-impl Round {
+impl Cubes {
     fn is_possible(&self) -> bool {
         self.red <= 12 && self.green <= 13 && self.blue <= 14
     }
@@ -112,24 +112,24 @@ Game 5: 6 red, 1 blue, 3 green; 2 blue, 1 red, 2 green";
     }
 
     #[rstest]
-    #[case(Round { red: 4, green: 0, blue: 3 }, true)]
-    #[case(Round { red: 20, green: 8, blue: 6 }, false)]
-    fn test_round_is_possible(#[case] round: Round, #[case] expected: bool) {
+    #[case(Cubes { red: 4, green: 0, blue: 3 }, true)]
+    #[case(Cubes { red: 20, green: 8, blue: 6 }, false)]
+    fn test_round_is_possible(#[case] round: Cubes, #[case] expected: bool) {
         assert_eq!(round.is_possible(), expected);
     }
 
     #[rstest]
     #[case(
         Game { id: 1, rounds: vec![
-            Round { red: 4, green: 0, blue: 3 },
-            Round { red: 1, green: 2, blue: 6 }
+            Cubes { red: 4, green: 0, blue: 3 },
+            Cubes { red: 1, green: 2, blue: 6 }
         ] },
         true
     )]
     #[case(
         Game { id: 2, rounds: vec![
-            Round { red: 20, green: 8, blue: 6 },
-            Round { red: 1, green: 2, blue: 6 }
+            Cubes { red: 20, green: 8, blue: 6 },
+            Cubes { red: 1, green: 2, blue: 6 }
         ] },
         false
     )]
@@ -138,20 +138,20 @@ Game 5: 6 red, 1 blue, 3 green; 2 blue, 1 red, 2 green";
     }
 
     #[rstest]
-    #[case(" 3 blue, 4 red", Round { red: 4, green: 0, blue: 3 })]
-    #[case(" 1 red, 2 green", Round { red: 1, green: 2, blue: 0 })]
-    #[case(" 5 blue, 4 red, 13 green", Round { red: 4, green: 13, blue: 5 })]
-    fn test_round_from_str(#[case] input: &str, #[case] expected: Round) {
-        assert_eq!(Round::from(input), expected);
+    #[case(" 3 blue, 4 red", Cubes { red: 4, green: 0, blue: 3 })]
+    #[case(" 1 red, 2 green", Cubes { red: 1, green: 2, blue: 0 })]
+    #[case(" 5 blue, 4 red, 13 green", Cubes { red: 4, green: 13, blue: 5 })]
+    fn test_round_from_str(#[case] input: &str, #[case] expected: Cubes) {
+        assert_eq!(Cubes::from(input), expected);
     }
 
     #[rstest]
     #[case(
         "Game 1: 3 blue, 4 red; 1 red, 2 green, 6 blue; 2 green",
         Game { id: 1, rounds: vec![
-            Round { red: 4, green: 0, blue: 3 },
-            Round { red: 1, green: 2, blue: 6 },
-            Round { red: 0, green: 2, blue: 0 },
+            Cubes { red: 4, green: 0, blue: 3 },
+            Cubes { red: 1, green: 2, blue: 6 },
+            Cubes { red: 0, green: 2, blue: 0 },
         ] }
     )]
     fn test_game_from_str(#[case] input: &str, #[case] expected: Game) {
