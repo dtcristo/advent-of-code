@@ -1,13 +1,10 @@
-use anyhow::Result;
 use std::fs::read_to_string;
 
-fn main() -> Result<()> {
-    let input = read_to_string("input/day_01")?;
+fn main() {
+    let input = read_to_string("input/day_01").unwrap();
     let result = solution(input);
 
     println!("{result}");
-
-    Ok(())
 }
 
 fn solution(input: String) -> u32 {

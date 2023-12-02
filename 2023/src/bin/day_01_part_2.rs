@@ -1,13 +1,10 @@
-use anyhow::Result;
 use std::fs::read;
 
-fn main() -> Result<()> {
-    let input = read("input/day_01")?;
+fn main() {
+    let input = read("input/day_01").unwrap();
     let result = solution(input);
 
     println!("{result}");
-
-    Ok(())
 }
 
 fn solution(input: Vec<u8>) -> u32 {

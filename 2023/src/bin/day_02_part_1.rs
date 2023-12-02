@@ -1,12 +1,8 @@
-use anyhow::Result;
-
-fn main() -> Result<()> {
+fn main() {
     let input = include_str!("../../input/day_02");
     let result = solution(input);
 
     println!("{result}");
-
-    Ok(())
 }
 
 fn solution(input: &str) -> u32 {
