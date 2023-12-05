@@ -1,10 +1,10 @@
-use std::{collections::HashSet, hash::Hash, num::Saturating};
+use std::collections::HashSet;
 
 use winnow::{
     ascii::digit1,
     combinator::alt,
     stream::{Location, Stream},
-    token::any,
+    token::none_of,
     Located, PResult, Parser,
 };
 
@@ -17,7 +17,19 @@ fn main() {
 
 fn solution(input: &str) -> u32 {
     let schematic = parse_schematic(input);
-    4361
+
+    let numbers = schematic.numbers;
+    let line_length = schematic.line_length;
+    let symbol_indexes = schematic.symbol_indexes;
+
+    dbg!(symbol_indexes.len());
+    dbg!(line_length);
+    dbg!(numbers.len());
+
+    numbers
+        .iter()
+        .filter_map(|number| number.part_number(line_length, &symbol_indexes))
+        .sum()
 }
 
 fn parse_schematic(input: &str) -> Schematic {
@@ -53,9 +65,7 @@ fn parse_token(input: &mut Located<&str>) -> PResult<Token> {
 
 fn parse_symbol(input: &mut Located<&str>) -> PResult<Token> {
     let index = input.location();
-    any.parse_next(input)?;
-
-    dbg!(input);
+    none_of(['.', '0', '1', '2', '3', '4', '5', '6', '7', '8', '9']).parse_next(input)?;
 
     Ok(Token::Symbol(Symbol { index }))
 }
@@ -79,7 +89,7 @@ fn parse_dot(input: &mut Located<&str>) -> PResult<Token> {
     Ok(Token::Dot)
 }
 
-#[derive(Debug, PartialEq, Eq)]
+#[derive(Debug, PartialEq, Eq, Clone)]
 struct Schematic {
     line_length: usize,
     symbol_indexes: HashSet<usize>,
@@ -93,12 +103,12 @@ enum Token {
     Dot,
 }
 
-#[derive(Debug, PartialEq, Eq, Hash)]
+#[derive(Debug, PartialEq, Eq)]
 struct Symbol {
     index: usize,
 }
 
-#[derive(Debug, PartialEq, Eq)]
+#[derive(Debug, PartialEq, Eq, Clone)]
 struct Number {
     index: usize,
     length: usize,
@@ -108,8 +118,50 @@ struct Number {
 impl Number {
     fn surrounding_indexes(&self, line_length: usize) -> HashSet<usize> {
         let mut result = HashSet::new();
-        result.insert(line_length);
+
+        let has_space_above = self.index > line_length;
+        let has_space_left = self.index % line_length != 0;
+        let has_space_right = (self.index + self.length) % line_length != 0;
+
+        let left = if has_space_left {
+            let left = self.index - 1;
+            result.insert(left);
+            left
+        } else {
+            self.index
+        };
+
+        let right = if has_space_right {
+            let right = self.index + self.length;
+            result.insert(right);
+            right
+        } else {
+            self.index + self.length - 1
+        };
+
+        if has_space_above {
+            ((left - line_length)..=(right - line_length)).for_each(|i| {
+                result.insert(i);
+            });
+        }
+
+        ((left + line_length)..=(right + line_length)).for_each(|i| {
+            result.insert(i);
+        });
+
         result
+    }
+
+    fn part_number(&self, line_length: usize, symbol_indexes: &HashSet<usize>) -> Option<u32> {
+        if self
+            .surrounding_indexes(line_length)
+            .is_disjoint(symbol_indexes)
+        {
+            None
+        } else {
+            // dbg!(self.value);
+            Some(self.value)
+        }
     }
 }
 
@@ -123,15 +175,15 @@ mod tests {
     #[test]
     fn test_solution() {
         let input = "467..114..
-    ...*......
-    ..35..633.
-    ......#...
-    617*......
-    .....+.58.
-    ..592.....
-    ......755.
-    ...$.*....
-    .664.598..";
+...*......
+..35..633.
+......#...
+617*......
+.....+.58.
+..592.....
+......755.
+...$.*....
+.664.598..";
         let result = solution(input);
         let expected = 4361;
         assert_eq!(result, expected);
@@ -159,7 +211,6 @@ mod tests {
                 value: 1234,
             })
         );
-        dbg!(located_input.location());
         assert_eq!(located_input.finish(), ".....");
     }
 
@@ -218,6 +269,24 @@ mod tests {
         },
         10,
         HashSet::from([4, 8, 14, 15, 16, 17, 18]),
+    )]
+    #[case(
+        Number {
+            index: 50,
+            length: 1,
+            value: 4,
+        },
+        10,
+        HashSet::from([40, 41, 51, 60, 61]),
+    )]
+    #[case(
+        Number {
+            index: 43,
+            length: 4,
+            value: 6666,
+        },
+        10,
+        HashSet::from([32, 33, 34, 35, 36, 37, 42, 47, 52, 53, 54, 55, 56, 57]),
     )]
     #[case(
         Number {
