@@ -33,7 +33,14 @@ fn solution(input: &str) -> u32 {
 }
 
 fn parse_schematic(input: &str) -> Schematic {
-    let mut lines_iter = input.lines().peekable();
+    let mut lines_iter = input
+        .lines()
+        .map(|line| {
+            let mut string = line.to_string();
+            string.push('.');
+            string
+        })
+        .peekable();
     let line_length = lines_iter.peek().unwrap().len();
     let flattened_input: String = lines_iter.collect();
     let mut located_input = Located::new(flattened_input.as_str());
