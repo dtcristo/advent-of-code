@@ -1,3 +1,5 @@
+use std::{collections::HashSet, hash::Hash, num::Saturating};
+
 use winnow::{
     ascii::digit1,
     combinator::alt,
@@ -24,13 +26,15 @@ fn parse_schematic(input: &str) -> Schematic {
     let flattened_input: String = lines_iter.collect();
     let mut located_input = Located::new(flattened_input.as_str());
 
-    let mut symbols = vec![];
+    let mut symbol_indexes = HashSet::new();
     let mut numbers = vec![];
 
     loop {
         match parse_token.parse_next(&mut located_input) {
             Ok(Token::Number(number)) => numbers.push(number),
-            Ok(Token::Symbol(symbol)) => symbols.push(symbol),
+            Ok(Token::Symbol(symbol)) => {
+                symbol_indexes.insert(symbol.index);
+            }
             Ok(Token::Dot) => {}
             Err(_) => break,
         }
@@ -38,7 +42,7 @@ fn parse_schematic(input: &str) -> Schematic {
 
     Schematic {
         line_length,
-        symbols,
+        symbol_indexes,
         numbers,
     }
 }
@@ -70,7 +74,7 @@ fn parse_number(input: &mut Located<&str>) -> PResult<Token> {
 }
 
 fn parse_dot(input: &mut Located<&str>) -> PResult<Token> {
-    ".".parse_next(input)?;
+    '.'.parse_next(input)?;
 
     Ok(Token::Dot)
 }
@@ -78,7 +82,7 @@ fn parse_dot(input: &mut Located<&str>) -> PResult<Token> {
 #[derive(Debug, PartialEq, Eq)]
 struct Schematic {
     line_length: usize,
-    symbols: Vec<Symbol>,
+    symbol_indexes: HashSet<usize>,
     numbers: Vec<Number>,
 }
 
@@ -89,7 +93,7 @@ enum Token {
     Dot,
 }
 
-#[derive(Debug, PartialEq, Eq)]
+#[derive(Debug, PartialEq, Eq, Hash)]
 struct Symbol {
     index: usize,
 }
@@ -101,12 +105,20 @@ struct Number {
     value: u32,
 }
 
+impl Number {
+    fn surrounding_indexes(&self, line_length: usize) -> HashSet<usize> {
+        let mut result = HashSet::new();
+        result.insert(line_length);
+        result
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use std::vec;
 
     use crate::*;
-    use winnow::stream::Location;
+    use rstest::rstest;
 
     #[test]
     fn test_solution() {
@@ -170,7 +182,7 @@ mod tests {
             output,
             Schematic {
                 line_length: 10,
-                symbols: vec![Symbol { index: 13 }, Symbol { index: 25 }],
+                symbol_indexes: HashSet::from([13, 25]),
                 numbers: vec![
                     Number {
                         index: 0,
@@ -195,5 +207,33 @@ mod tests {
                 ],
             }
         );
+    }
+
+    #[rstest]
+    #[case(
+        Number {
+            index: 5,
+            length: 3,
+            value: 114,
+        },
+        10,
+        HashSet::from([4, 8, 14, 15, 16, 17, 18]),
+    )]
+    #[case(
+        Number {
+            index: 98,
+            length: 2,
+            value: 88,
+        },
+        10,
+        HashSet::from([87, 88, 89, 97, 107, 108, 109]),
+    )]
+    fn test_number_surrounding_indexes(
+        #[case] number: Number,
+        #[case] line_length: usize,
+        #[case] expected: HashSet<usize>,
+    ) {
+        let result = number.surrounding_indexes(line_length);
+        assert_eq!(result, expected);
     }
 }
