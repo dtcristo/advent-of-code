@@ -25,7 +25,7 @@ fn solution(input: &str) -> u32 {
     gear_symbol_indexes
         .iter()
         .filter_map(|&index| {
-            let unique_numbers = surrounding_indexes(index, line_length)
+            let unique_numbers = adjacent_indexes(index, line_length)
                 .iter()
                 .filter_map(|surrounding_index| numbers.get(surrounding_index))
                 .collect::<HashSet<&Number>>();
@@ -138,7 +138,7 @@ struct Number {
     value: u32,
 }
 
-fn surrounding_indexes(index: usize, line_length: usize) -> HashSet<usize> {
+fn adjacent_indexes(index: usize, line_length: usize) -> HashSet<usize> {
     let mut result = HashSet::new();
 
     let has_space_above = index > line_length;

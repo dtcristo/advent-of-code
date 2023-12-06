@@ -115,7 +115,7 @@ struct Number {
 }
 
 impl Number {
-    fn surrounding_indexes(&self, line_length: usize) -> HashSet<usize> {
+    fn adjacent_indexes(&self, line_length: usize) -> HashSet<usize> {
         let mut result = HashSet::new();
 
         let has_space_above = self.index > line_length;
@@ -153,7 +153,7 @@ impl Number {
 
     fn part_number(&self, line_length: usize, symbol_indexes: &HashSet<usize>) -> Option<u32> {
         if self
-            .surrounding_indexes(line_length)
+            .adjacent_indexes(line_length)
             .is_disjoint(symbol_indexes)
         {
             None
@@ -293,12 +293,12 @@ mod tests {
         10,
         HashSet::from([87, 88, 89, 97, 107, 108, 109]),
     )]
-    fn test_number_surrounding_indexes(
+    fn test_number_adjacent_indexes(
         #[case] number: Number,
         #[case] line_length: usize,
         #[case] expected: HashSet<usize>,
     ) {
-        let result = number.surrounding_indexes(line_length);
+        let result = number.adjacent_indexes(line_length);
         assert_eq!(result, expected);
     }
 }
