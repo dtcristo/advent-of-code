@@ -53,7 +53,7 @@ fn parse_schematic(input: &str) -> Schematic {
     // Wrap in `Located` so parsers can find index within input.
     let mut located_input = Located::new(flattened_input.as_str());
 
-    let mut gear_symbol_indexes = HashSet::new();
+    let mut gear_symbol_indexes = vec![];
     let mut numbers = HashMap::new();
 
     loop {
@@ -65,7 +65,7 @@ fn parse_schematic(input: &str) -> Schematic {
             }
             Ok(Token::Symbol(symbol)) => {
                 if symbol.char == '*' {
-                    gear_symbol_indexes.insert(symbol.index);
+                    gear_symbol_indexes.push(symbol.index);
                 }
             }
             Ok(Token::Dot) => {}
@@ -114,7 +114,7 @@ fn parse_dot(input: &mut Located<&str>) -> PResult<Token> {
 #[derive(Debug, PartialEq, Eq)]
 struct Schematic {
     line_length: usize,
-    gear_symbol_indexes: HashSet<usize>,
+    gear_symbol_indexes: Vec<usize>,
     numbers: HashMap<usize, Number>,
 }
 
@@ -244,7 +244,7 @@ mod tests {
             output,
             Schematic {
                 line_length: 11,
-                gear_symbol_indexes: HashSet::from([14]),
+                gear_symbol_indexes: vec![14],
                 numbers: HashMap::from([
                     (
                         0,
