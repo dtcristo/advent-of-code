@@ -1,7 +1,6 @@
 fn main() {
     let input = include_bytes!("../../input/day_01");
     let result = solution(input);
-
     println!("{result}");
 }
 

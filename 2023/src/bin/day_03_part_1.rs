@@ -1,5 +1,6 @@
 use std::collections::HashSet;
 
+use itertools::Itertools;
 use winnow::{
     ascii::digit1,
     combinator::alt,
@@ -11,20 +12,15 @@ use winnow::{
 fn main() {
     let mut input = include_str!("../../input/day_03");
     let result = solution(&mut input);
-
     println!("{result}");
 }
 
 fn solution(input: &str) -> u32 {
-    let schematic = parse_schematic(input);
-
-    let numbers = schematic.numbers;
-    let line_length = schematic.line_length;
-    let symbol_indexes = schematic.symbol_indexes;
-
-    dbg!(symbol_indexes.len());
-    dbg!(line_length);
-    dbg!(numbers.len());
+    let Schematic {
+        line_length,
+        symbol_indexes,
+        numbers,
+    } = parse_schematic(input);
 
     numbers
         .iter()
@@ -33,16 +29,12 @@ fn solution(input: &str) -> u32 {
 }
 
 fn parse_schematic(input: &str) -> Schematic {
-    let mut lines_iter = input
-        .lines()
-        .map(|line| {
-            let mut string = line.to_string();
-            string.push('.');
-            string
-        })
-        .peekable();
-    let line_length = lines_iter.peek().unwrap().len();
-    let flattened_input: String = lines_iter.collect();
+    // Iterate lines of input and remember the line length.
+    let mut lines_iter = input.lines().peekable();
+    let line_length = lines_iter.peek().unwrap().len() + 1;
+    // Join the lines into a single string separated by ".".
+    let flattened_input = lines_iter.join(".");
+    // Wrap in `Located` so parsers can find index within input.
     let mut located_input = Located::new(flattened_input.as_str());
 
     let mut symbol_indexes = HashSet::new();
@@ -166,7 +158,6 @@ impl Number {
         {
             None
         } else {
-            // dbg!(self.value);
             Some(self.value)
         }
     }
@@ -174,8 +165,6 @@ impl Number {
 
 #[cfg(test)]
 mod tests {
-    use std::vec;
-
     use crate::*;
     use rstest::rstest;
 
@@ -239,8 +228,8 @@ mod tests {
         assert_eq!(
             output,
             Schematic {
-                line_length: 10,
-                symbol_indexes: HashSet::from([13, 25]),
+                line_length: 11,
+                symbol_indexes: HashSet::from([14, 27]),
                 numbers: vec![
                     Number {
                         index: 0,
@@ -253,12 +242,12 @@ mod tests {
                         value: 114,
                     },
                     Number {
-                        index: 22,
+                        index: 24,
                         length: 2,
                         value: 35,
                     },
                     Number {
-                        index: 26,
+                        index: 28,
                         length: 3,
                         value: 633,
                     }
