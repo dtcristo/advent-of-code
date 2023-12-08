@@ -50,26 +50,21 @@ impl Hand {
 
     // Classify the hand into a `HandType` variant.
     fn classify(&self) -> HandType {
-        let grouped_cards: Vec<usize> =
+        let counts: Vec<usize> =
             // Iterate over cards in the hand.
             self
                 .cards
                 .iter()
-                // Convert card into numeric representation and sort ascending.
-                // We sort here so identical cards are consecutive.
-                .map(|&card| card as u8)
-                .sorted()
-                // Group matching consecutive cards.
-                .group_by(|&card_value| card_value)
-                .into_iter()
-                // Count the size of each group.
-                .map(|(_, group)| group.count())
-                // Sort the group sizes for matching below.
+                // Count card occurences.
+                .counts()
+                .values()
+                .map(|&v| v)
+                // Sort the counts for matching below.
                 .sorted()
                 .collect();
 
         // Match every possible compbination of grouped cards into a `HandType`.
-        match grouped_cards.as_slice() {
+        match counts.as_slice() {
             [1, 1, 1, 1, 1] => HandType::HighCard,
             [1, 1, 1, 2] => HandType::OnePair,
             [1, 2, 2] => HandType::TwoPair,
@@ -119,7 +114,7 @@ enum HandType {
 // Struct representing a single card. This is `repr(u8)` for use in
 // `Hand::strength` calculation (and other places we sort cards).
 // The order here is significant.
-#[derive(Debug, PartialEq, Eq, Clone, Copy)]
+#[derive(Debug, PartialEq, Eq, Clone, Copy, Hash)]
 #[repr(u8)]
 enum Card {
     Two,
