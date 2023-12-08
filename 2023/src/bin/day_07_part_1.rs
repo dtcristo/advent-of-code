@@ -58,7 +58,7 @@ impl Hand {
                 // Count card occurences.
                 .counts()
                 .values()
-                .map(|&v| v)
+                .cloned()
                 // Sort the counts for matching below.
                 .sorted()
                 .collect();
