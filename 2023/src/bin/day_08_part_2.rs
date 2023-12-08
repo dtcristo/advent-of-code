@@ -14,28 +14,40 @@ fn main() {
     println!("{result}");
 }
 
-fn solution(mut input: &str) -> u32 {
+fn solution(mut input: &str) -> u64 {
     let directions: Vec<Direction> = repeat(0.., Direction::parse)
         .parse_next(&mut input)
         .unwrap();
     let network = Network::parse(&mut input).unwrap();
 
+    let starting_locations: Vec<&[u8; 3]> = network
+        .map
+        .keys()
+        .filter(|&location| location[2] == b'A')
+        .collect();
+
     directions
         .iter()
         .cycle()
-        .fold_while((0_u32, b"AAA"), |(index, location), &direction| {
-            if location == b"ZZZ" {
-                Done((index, location))
-            } else {
-                Continue((
-                    index + 1,
-                    match direction {
-                        Direction::Left => &network.map.get(location).unwrap().0,
-                        Direction::Right => &network.map.get(location).unwrap().1,
-                    },
-                ))
-            }
-        })
+        .fold_while(
+            (0_u64, starting_locations),
+            |(index, locations), &direction| {
+                if locations.iter().all(|&location| location[2] == b'Z') {
+                    Done((index, locations))
+                } else {
+                    Continue((
+                        index + 1,
+                        locations
+                            .iter()
+                            .map(|&location| match direction {
+                                Direction::Left => &network.map.get(location).unwrap().0,
+                                Direction::Right => &network.map.get(location).unwrap().1,
+                            })
+                            .collect(),
+                    ))
+                }
+            },
+        )
         .into_inner()
         .0
 }
@@ -106,27 +118,16 @@ mod tests {
 
     #[test]
     fn test_solution() {
-        let input = "RL
+        let input = "LR
 
-AAA = (BBB, CCC)
-BBB = (DDD, EEE)
-CCC = (ZZZ, GGG)
-DDD = (DDD, DDD)
-EEE = (EEE, EEE)
-GGG = (GGG, GGG)
-ZZZ = (ZZZ, ZZZ)";
-        let result = solution(input);
-        let expected = 2;
-        assert_eq!(result, expected);
-    }
-
-    #[test]
-    fn test_solution_2() {
-        let input = "LLR
-
-AAA = (BBB, BBB)
-BBB = (AAA, ZZZ)
-ZZZ = (ZZZ, ZZZ)";
+11A = (11B, XXX)
+11B = (XXX, 11Z)
+11Z = (11B, XXX)
+22A = (22B, XXX)
+22B = (22C, 22C)
+22C = (22Z, 22Z)
+22Z = (22B, 22B)
+XXX = (XXX, XXX)";
         let result = solution(input);
         let expected = 6;
         assert_eq!(result, expected);
