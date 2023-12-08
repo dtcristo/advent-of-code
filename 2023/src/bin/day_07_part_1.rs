@@ -97,7 +97,7 @@ impl Hand {
         ]
         .iter()
         .enumerate()
-        .map(|(i, x)| x * 13u32.pow(i as u32))
+        .map(|(i, x)| x * 13_u32.pow(i as u32))
         .sum()
     }
 }
