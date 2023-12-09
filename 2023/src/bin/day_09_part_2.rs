@@ -11,7 +11,7 @@ fn solution(input: &str) -> i32 {
         .lines()
         .map(|line| {
             line.split(' ')
-                .map(|value| value.parse::<i32>().unwrap())
+                .map(|value| value.parse().unwrap())
                 .rev()
                 .collect()
         })
@@ -21,10 +21,10 @@ fn solution(input: &str) -> i32 {
 
 fn extrapolate(values: Vec<i32>) -> i32 {
     if values.iter().all(|&value| value == 0) {
-        return 0;
+        0
     } else {
         let children = values.iter().tuple_windows().map(|(a, b)| b - a).collect();
-        return values.last().unwrap() + extrapolate(children);
+        values.last().unwrap() + extrapolate(children)
     }
 }
 
