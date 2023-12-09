@@ -15,28 +15,40 @@ fn main() {
 }
 
 fn solution(mut input: &str) -> u32 {
+    // Build a vector of directions.
     let directions: Vec<Direction> = repeat(0.., Direction::parse)
         .parse_next(&mut input)
         .unwrap();
+    // Build the network hash map.
     let network = Network::parse(&mut input).unwrap();
 
     directions
         .iter()
+        // Cycle directions infinitely.
         .cycle()
-        .fold_while((0_u32, b"AAA"), |(index, location), &direction| {
-            if location == b"ZZZ" {
-                Done((index, location))
+        // Fold a tuple of `(index: u32, node: &[u8; 3])` representing
+        // current index and current node. Keep folding traversing through
+        // the map (using current direction) until current node is "ZZZ",
+        // incrementing index each step.
+        .fold_while((0_u32, b"AAA"), |(index, node), &direction| {
+            if node == b"ZZZ" {
+                Done((index, node))
             } else {
+                // Lookup the connected nodes from the map by node.
+                let connected_nodes = network.map.get(node).unwrap();
                 Continue((
+                    // New index.
                     index + 1,
+                    // Get new node from connected nodes by direction.
                     match direction {
-                        Direction::Left => &network.map.get(location).unwrap().0,
-                        Direction::Right => &network.map.get(location).unwrap().1,
+                        Direction::Left => &connected_nodes.0,
+                        Direction::Right => &connected_nodes.1,
                     },
                 ))
             }
         })
         .into_inner()
+        // Return calculated index.
         .0
 }
 
@@ -59,6 +71,8 @@ impl Direction {
 
 #[derive(Debug, PartialEq, Eq, Clone)]
 struct Network {
+    // Network map is a hash map from node to 2-tuple of connected nodes
+    // (representing left and right direction).
     map: HashMap<[u8; 3], ([u8; 3], [u8; 3])>,
 }
 
@@ -69,7 +83,7 @@ impl Network {
         }
     }
 
-    // Parse an input string slice into `Direction`.
+    // Parse an input string slice into `Network`.
     fn parse(input: &mut &str) -> PResult<Network> {
         let _ = "\n\n".parse_next(input)?;
         fold_repeat(

@@ -2,6 +2,7 @@ use std::collections::HashMap;
 
 use itertools::FoldWhile::{Continue, Done};
 use itertools::Itertools;
+use num::integer::lcm;
 use winnow::{
     combinator::{fail, fold_repeat, opt, repeat},
     token::{any, take},
@@ -15,41 +16,49 @@ fn main() {
 }
 
 fn solution(mut input: &str) -> u64 {
+    // Build a vector of directions.
     let directions: Vec<Direction> = repeat(0.., Direction::parse)
         .parse_next(&mut input)
         .unwrap();
+    // Build the network hash map.
     let network = Network::parse(&mut input).unwrap();
 
-    let starting_locations: Vec<&[u8; 3]> = network
+    network
         .map
+        // Iterate over map nodes.
         .keys()
-        .filter(|&location| location[2] == b'A')
-        .collect();
-
-    directions
-        .iter()
-        .cycle()
-        .fold_while(
-            (0_u64, starting_locations),
-            |(index, locations), &direction| {
-                if locations.iter().all(|&location| location[2] == b'Z') {
-                    Done((index, locations))
-                } else {
-                    Continue((
-                        index + 1,
-                        locations
-                            .iter()
-                            .map(|&location| match direction {
-                                Direction::Left => &network.map.get(location).unwrap().0,
-                                Direction::Right => &network.map.get(location).unwrap().1,
-                            })
-                            .collect(),
-                    ))
-                }
-            },
-        )
-        .into_inner()
-        .0
+        // Find all node nodes ending in "A". These are our "starting nodes".
+        .filter(|&node| node[2] == b'A')
+        // Find the index where this starting node reaches a node ending in "Z".
+        .map(|starting_node| {
+            directions
+                .iter()
+                // Cycle directions infinitely.
+                .cycle()
+                .fold_while((0_u32, starting_node), |(index, node), &direction| {
+                    if node[2] == b'Z' {
+                        Done((index, node))
+                    } else {
+                        // Lookup the connected nodes from the map by node.
+                        let connected_nodes = network.map.get(node).unwrap();
+                        Continue((
+                            // New index.
+                            index + 1,
+                            // Get new node from connected nodes by direction.
+                            match direction {
+                                Direction::Left => &connected_nodes.0,
+                                Direction::Right => &connected_nodes.1,
+                            },
+                        ))
+                    }
+                })
+                .into_inner()
+                // Return calculated index as `u64`.
+                .0 as u64
+        })
+        // Calculate the LCM (lowest common multiple) of all indexes.
+        .reduce(|acc, index| lcm(acc, index))
+        .unwrap()
 }
 
 #[derive(Debug, PartialEq, Eq, Clone, Copy)]
@@ -71,6 +80,8 @@ impl Direction {
 
 #[derive(Debug, PartialEq, Eq, Clone)]
 struct Network {
+    // Network map is a hash map from node to 2-tuple of connected nodes
+    // (representing left and right direction).
     map: HashMap<[u8; 3], ([u8; 3], [u8; 3])>,
 }
 
@@ -81,7 +92,7 @@ impl Network {
         }
     }
 
-    // Parse an input string slice into `Direction`.
+    // Parse an input string slice into `Network`.
     fn parse(input: &mut &str) -> PResult<Network> {
         let _ = "\n\n".parse_next(input)?;
         fold_repeat(
