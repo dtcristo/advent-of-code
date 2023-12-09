@@ -117,10 +117,11 @@ impl Network {
 #[cfg(test)]
 mod tests {
     use crate::*;
+    use rstest::rstest;
 
-    #[test]
-    fn test_solution() {
-        let input = "RL
+    #[rstest]
+    #[case(
+        "RL
 
 AAA = (BBB, CCC)
 BBB = (DDD, EEE)
@@ -128,21 +129,19 @@ CCC = (ZZZ, GGG)
 DDD = (DDD, DDD)
 EEE = (EEE, EEE)
 GGG = (GGG, GGG)
-ZZZ = (ZZZ, ZZZ)";
-        let result = solution(input);
-        let expected = 2;
-        assert_eq!(result, expected);
-    }
-
-    #[test]
-    fn test_solution_2() {
-        let input = "LLR
+ZZZ = (ZZZ, ZZZ)",
+        2
+    )]
+    #[case(
+        "LLR
 
 AAA = (BBB, BBB)
 BBB = (AAA, ZZZ)
-ZZZ = (ZZZ, ZZZ)";
+ZZZ = (ZZZ, ZZZ)",
+        6
+    )]
+    fn test_solution(#[case] input: &str, #[case] expected: u32) {
         let result = solution(input);
-        let expected = 6;
         assert_eq!(result, expected);
     }
 
