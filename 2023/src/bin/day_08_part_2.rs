@@ -29,12 +29,13 @@ fn solution(mut input: &str) -> u64 {
         .keys()
         // Find all node nodes ending in "A". These are our "starting nodes".
         .filter(|&node| node[2] == b'A')
-        // Find the index where this starting node reaches a node ending in "Z".
+        // Find the index where each starting node reaches a node ending in "Z".
         .map(|starting_node| {
             directions
                 .iter()
                 // Cycle directions infinitely.
                 .cycle()
+                // Fold to find index of first "Z" node.
                 .fold_while((0_u32, starting_node), |(index, node), &direction| {
                     if node[2] == b'Z' {
                         Done((index, node))
