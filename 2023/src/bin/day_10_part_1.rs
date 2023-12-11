@@ -37,13 +37,13 @@ impl Tiles {
         let grid: Vec<Vec<Tile>> = input
             .lines()
             .enumerate()
-            .map(|(line_index, line)| {
+            .map(|(row_index, line)| {
                 line.chars()
                     .enumerate()
                     .map(|(column_index, char)| {
                         let tile = Tile::parse(char);
                         if tile == Tile::Start {
-                            start_location = Some(Location(line_index, column_index));
+                            start_location = Some(Location(row_index, column_index));
                         }
                         tile
                     })
