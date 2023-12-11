@@ -8,30 +8,22 @@ fn main() {
 
 fn solution(input: &str) -> u32 {
     let tiles = Tiles::parse(input);
-    let starting_direction = *tiles.start_connections().first().unwrap();
+    let start_direction = *tiles.start_connections().first().unwrap();
     let start_location = tiles.start_location.unwrap();
-    let next_location = start_location.translate(starting_direction).unwrap();
+    let next_location = start_location.translate(start_direction).unwrap();
 
-    let (iterations, _) = iter::successors(
-        Some((starting_direction, next_location)),
-        |(direction, location)| {
-            if *location == start_location {
+    iter::successors(
+        Some((start_direction, next_location)),
+        |&(direction, location)| {
+            if location == start_location {
                 None
             } else {
-                Some(
-                    tiles
-                        .get(*location)
-                        .unwrap()
-                        .traverse(*direction, *location),
-                )
+                Some(tiles.get(location).unwrap().traverse(direction, location))
             }
         },
     )
-    .enumerate()
-    .last()
-    .unwrap();
-
-    (iterations as u32 + 1) / 2
+    .count() as u32
+        / 2
 }
 
 struct Tiles {
@@ -80,7 +72,6 @@ impl Tiles {
                     .translate(direction)
                     .and_then(|adjacent_location| {
                         self.get(adjacent_location).and_then(|adjacent_tile| {
-                            dbg!(adjacent_tile);
                             if adjacent_tile.is_connected(direction.inverse()) {
                                 Some(direction)
                             } else {
@@ -195,11 +186,11 @@ impl Tile {
         *self != Tile::Ground && self.connections().into_iter().any(|d| d == direction)
     }
 
-    fn traverse(&self, last_direction: Direction, location: Location) -> (Direction, Location) {
+    fn traverse(&self, direction: Direction, location: Location) -> (Direction, Location) {
         let next_direction = self
             .connections()
             .into_iter()
-            .find(|&d| d != last_direction.inverse())
+            .find(|&d| d != direction.inverse())
             .unwrap();
         let next_location = location.translate(next_direction).unwrap();
 
