@@ -116,8 +116,9 @@ impl Network {
 
 #[cfg(test)]
 mod tests {
-    use crate::*;
     use rstest::rstest;
+
+    use crate::*;
 
     #[rstest]
     #[case(

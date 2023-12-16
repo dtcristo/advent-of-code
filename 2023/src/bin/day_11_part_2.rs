@@ -68,8 +68,9 @@ struct Galaxy(usize, usize);
 
 #[cfg(test)]
 mod tests {
-    use crate::*;
     use rstest::rstest;
+
+    use crate::*;
 
     #[rstest]
     #[case(10, 1030)]

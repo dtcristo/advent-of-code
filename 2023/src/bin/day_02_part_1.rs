@@ -91,8 +91,9 @@ impl Cubes {
 
 #[cfg(test)]
 mod tests {
-    use crate::*;
     use rstest::rstest;
+
+    use crate::*;
 
     #[test]
     fn test_solution() {

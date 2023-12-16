@@ -38,8 +38,9 @@ fn extrapolate(values: Vec<i32>) -> i32 {
 
 #[cfg(test)]
 mod tests {
-    use crate::*;
     use rstest::rstest;
+
+    use crate::*;
 
     #[test]
     fn test_solution() {
